@@ -15,7 +15,7 @@ async function main() {
     const url = `https://infinibrowser.wiki/static/${path}.js`;
     const response = await fetch(url);
     const content = await response.text();
-    updateContent(path, content);
+    updateContent(path, `${content.trim()}\n`);
   }
 }
 
