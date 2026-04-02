@@ -1,0 +1,59 @@
+name: Update API
+
+on:
+  schedule:
+    - cron: "0 3 1-7 * 5" # 1st Friday of the month
+    - cron: "0 3 15-21 * 5" # 3rd Friday of the month
+    - cron: "0 3 30-31 * 5" # 5th Friday of the month
+  workflow_dispatch:
+
+jobs:
+  update-api:
+    name: Update API
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Update content
+        run: bun run content:update
+
+      - name: Check content
+        run: bun run content:check
+
+      - name: Create or update Pull Request
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        with:
+          token: ${{ secrets.CI_PAT }}
+          commit-message: "ci: update content"
+          title: "ci: update content"
+          committer: CI <ci@rman.dev>
+          author: CI <ci@rman.dev>
+          body: Update Content
+          branch: update-content
+          delete-branch: true
+          assignees: gameroman
+          reviewers: gameroman
+          labels: ci
+
+      - name: Notify Discord
+        if: always()
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: ${{ job.status }}
+          title: "Update API (#${{ github.run_number }})"
+          description: |
+            Status: **${{ job.status }}**
+            Branch: ${{ github.ref_name }}
+            Trigger: ${{ github.event_name }}
+            Commit: ${{ github.sha }}

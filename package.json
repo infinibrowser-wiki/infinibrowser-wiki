@@ -1,0 +1,13 @@
+{
+  "name": "inifnibrowser-wiki",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "content:update": "bun ./scripts/update-content.ts",
+    "content:check": "bun ./scripts/check-content.ts"
+  },
+  "devDependencies": {
+    "@gameroman/config": "0.0.6",
+    "@types/bun": "1.3.11"
+  }
+}
